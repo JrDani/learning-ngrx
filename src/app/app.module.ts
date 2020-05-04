@@ -8,6 +8,7 @@ import { ProductData } from './products/product-data';
 
 import { AppRoutingModule } from './app-routing.module';
 import { StoreModule } from '@ngrx/store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 import { AppComponent } from './app.component';
 import { ShellComponent } from './home/shell.component';
@@ -17,6 +18,7 @@ import { PageNotFoundComponent } from './home/page-not-found.component';
 
 /* Feature Modules */
 import { UserModule } from './user/user.module';
+import { environment } from 'src/environments/environment';
 
 @NgModule({
   imports: [
@@ -25,7 +27,12 @@ import { UserModule } from './user/user.module';
     HttpClientInMemoryWebApiModule.forRoot(ProductData),
     UserModule,
     AppRoutingModule,
-    StoreModule.forRoot({})
+    StoreModule.forRoot({}),
+    StoreDevtoolsModule.instrument({
+      name: 'Aprendendo',
+      maxAge: 25,
+      logOnly: environment.production
+    })
   ],
   declarations: [
     AppComponent,
