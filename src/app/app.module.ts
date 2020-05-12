@@ -9,6 +9,7 @@ import { ProductData } from './products/product-data';
 import { AppRoutingModule } from './app-routing.module';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { EffectsModule } from '@ngrx/effects';
 
 import { AppComponent } from './app.component';
 import { ShellComponent } from './home/shell.component';
@@ -28,11 +29,12 @@ import { environment } from 'src/environments/environment';
     UserModule,
     AppRoutingModule,
     StoreModule.forRoot({}),
+    EffectsModule.forRoot([]),
     StoreDevtoolsModule.instrument({
       name: 'Aprendendo',
       maxAge: 25,
       logOnly: environment.production
-    })
+    }),
   ],
   declarations: [
     AppComponent,
