@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { Subscription } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 import { Store, select } from '@ngrx/store';
 import * as fromProduct from '../state/product.reducer';
 import * as productActions from '../state/product.actions';
 
 import { Product } from '../product';
 import { ProductService } from '../product.service';
+import { takeWhile } from 'rxjs/operators';
 
 @Component({
   selector: 'pm-product-list',
@@ -14,6 +15,7 @@ import { ProductService } from '../product.service';
   styleUrls: ['./product-list.component.css']
 })
 export class ProductListComponent implements OnInit, OnDestroy {
+  componentActive = true;
   pageTitle = 'Products';
   errorMessage: string;
 
@@ -23,6 +25,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   // Used to highlight the selected product in the list
   selectedProduct: Product | null;
+  products$: Observable<Product[]>;
+  errorMessage$: Observable<string>;
 
   constructor(private productService: ProductService, private store: Store<fromProduct.State>) { }
 
@@ -30,9 +34,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.store.pipe(select(fromProduct.getCurrentProduct)).subscribe(
       currentProduct => this.selectedProduct = currentProduct
     );
-    this.store.pipe(select(fromProduct.getProducts)).subscribe(
-      products => this.products = products
-    );
+    // unsubscribe com takeWhile é para casos onde async pipe não pode ser aplicado
+    // this.store.pipe(select(fromProduct.getProducts),
+    //   takeWhile(() => this.componentActive))
+    //   .subscribe(
+    //     products => this.products = products
+    // );
+    this.errorMessage$ = this.store.pipe(select(fromProduct.getError));
+    this.products$ = this.store.pipe(select(fromProduct.getProducts));
     this.store.pipe(select(fromProduct.getShowProductCode)).subscribe(
       showProductCode => this.displayCode = showProductCode
     );
@@ -40,8 +49,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // TODO: unsubscribe os selectors
-    // this.sub.unsubscribe();
+    this.componentActive = false;
   }
 
   checkChanged(value: boolean): void {
