@@ -12,13 +12,15 @@ export interface ProductState {
     currentProduct: Product;
     products: Product[];
     error: string;
+    updateError: string;
 }
 
 const initialState: ProductState = {
     showProductCode: true,
     currentProduct: null,
     products: [],
-    error: ''
+    error: '',
+    updateError: '',
 };
 
 const getProductFeatureState = createFeatureSelector<ProductState>('produtos');
@@ -41,6 +43,16 @@ export const getProducts = createSelector(
 export const getError = createSelector(
     getProductFeatureState,
     state => state.error
+);
+
+export const getUpdateSucess = createSelector(
+    getProductFeatureState,
+    state => state.currentProduct
+);
+
+export const getUpdateFail = createSelector(
+    getProductFeatureState,
+    state => state.updateError
 );
 
 export function reducer(state = initialState, action: ProductActions): ProductState {
@@ -91,6 +103,20 @@ export function reducer(state = initialState, action: ProductActions): ProductSt
                 products: [],
                 error: action.payload
             };
+
+        case ProductActionTypes.UpdateProductSuccess:
+            return {
+                ...state,
+                currentProduct: {...action.payload},
+                error: ''
+            };
+
+        case ProductActionTypes.UpdateProductFail:
+            return {
+                ...state,
+                error: action.payload
+            };
+
         default:
             return state;
     }

@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import { Subscription } from 'rxjs';
 import { Store, select } from '@ngrx/store';
 import * as fromProduct from '../state/product.reducer';
 import * as productActions from '../state/product.actions';
@@ -10,7 +9,8 @@ import { Product } from '../product';
 import { ProductService } from '../product.service';
 import { GenericValidator } from '../../shared/generic-validator';
 import { NumberValidators } from '../../shared/number.validator';
-import { ProductActionTypes } from '../state/product.actions';
+import { takeWhile } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'pm-product-edit',
@@ -28,6 +28,8 @@ export class ProductEditComponent implements OnInit, OnDestroy {
   displayMessage: { [key: string]: string } = {};
   private validationMessages: { [key: string]: { [key: string]: string } };
   private genericValidator: GenericValidator;
+  componentActive = true;
+  updateErrorMessage$: Observable<string>;
 
   constructor(private fb: FormBuilder,
               private productService: ProductService,
@@ -73,9 +75,17 @@ export class ProductEditComponent implements OnInit, OnDestroy {
     this.productForm.valueChanges.subscribe(
       value => this.displayMessage = this.genericValidator.processMessages(this.productForm)
     );
+
+    this.store.pipe(select(fromProduct.getUpdateSucess), takeWhile(() => this.componentActive))
+      .subscribe(
+        currentProduct => this.displayProduct(currentProduct)
+      );
+
+    this.updateErrorMessage$ = this.store.pipe(select(fromProduct.getUpdateFail));
   }
 
   ngOnDestroy(): void {
+    this.componentActive = false;
   }
 
   // Also validate on blur
@@ -143,10 +153,11 @@ export class ProductEditComponent implements OnInit, OnDestroy {
             (err: any) => this.errorMessage = err.error
           );
         } else {
-          this.productService.updateProduct(p).subscribe(
-            () => this.store.dispatch(new productActions.SetCurrentProduct(p)),
-            (err: any) => this.errorMessage = err.error
-          );
+          this.store.dispatch(new productActions.UpdateProduct(p));
+          // this.productService.updateProduct(p).subscribe(
+          //   () => this.store.dispatch(new productActions.SetCurrentProduct(p)),
+          //   (err: any) => this.errorMessage = err.error
+          // );
         }
       }
     } else {
