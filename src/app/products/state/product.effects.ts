@@ -23,9 +23,10 @@ export class ProductEffects {
     @Effect()
     updateProduct$ = this.actions$.pipe(
         ofType(productActions.ProductActionTypes.UpdateProduct),
-        mergeMap((action: productActions.UpdateProduct) => this.productService.updateProduct(action.payload)
+        map((action: productActions.UpdateProduct) => action.payload),
+        mergeMap((product: Product) => this.productService.updateProduct(product)
             .pipe(
-                map((product: Product) => (new productActions.UpdateProductSuccess(product))),
+                map(updatedProduct => (new productActions.UpdateProductSuccess(updatedProduct))),
                 catchError(err => of(new productActions.UpdateProductFail(err)))
             )
         )
