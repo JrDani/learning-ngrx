@@ -31,7 +31,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
   constructor(private productService: ProductService, private store: Store<fromProduct.State>) { }
 
   ngOnInit(): void {
-    this.store.pipe(select(fromProduct.getCurrentProduct)).subscribe(
+    this.store.pipe(
+      select(fromProduct.getCurrentProduct),
+      takeWhile(() => this.componentActive)
+    ).subscribe(
       currentProduct => this.selectedProduct = currentProduct
     );
     // unsubscribe com takeWhile é para casos onde async pipe não pode ser aplicado

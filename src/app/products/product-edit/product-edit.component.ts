@@ -67,7 +67,10 @@ export class ProductEditComponent implements OnInit, OnDestroy {
       description: ''
     });
 
-    this.store.select(fromProduct.getCurrentProduct).subscribe(
+    this.store.pipe(
+      select(fromProduct.getCurrentProduct),
+      takeWhile(() => this.componentActive)
+    ).subscribe(
       currentProduct => this.displayProduct(currentProduct)
     );
 
@@ -75,11 +78,6 @@ export class ProductEditComponent implements OnInit, OnDestroy {
     this.productForm.valueChanges.subscribe(
       value => this.displayMessage = this.genericValidator.processMessages(this.productForm)
     );
-
-    this.store.pipe(select(fromProduct.getUpdateSucess), takeWhile(() => this.componentActive))
-      .subscribe(
-        currentProduct => this.displayProduct(currentProduct)
-      );
 
     this.updateErrorMessage$ = this.store.pipe(select(fromProduct.getUpdateFail));
   }
@@ -95,6 +93,7 @@ export class ProductEditComponent implements OnInit, OnDestroy {
   }
 
   displayProduct(product: Product | null): void {
+    console.log('setando 2', product);
     // Set the local product property
     this.product = product;
 
