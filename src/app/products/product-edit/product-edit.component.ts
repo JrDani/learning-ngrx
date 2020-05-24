@@ -93,7 +93,6 @@ export class ProductEditComponent implements OnInit, OnDestroy {
   }
 
   displayProduct(product: Product | null): void {
-    console.log('setando 2', product);
     // Set the local product property
     this.product = product;
 
